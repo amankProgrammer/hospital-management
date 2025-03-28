@@ -38,3 +38,5 @@ Thumbs.db
 
 # Ignore environment files
 .env
+
+src/main/resources/application.properties
