@@ -24,6 +24,10 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Enumerated(EnumType.STRING) // ✅ Change role type to ENUM
     @Column(nullable = false)
-    private String role; // e.g. PATIENT, DOCTOR, ADMIN
+    private Role role;  // e.g. PATIENT, DOCTOR, ADMIN
+
+    @Column()
+    private boolean approved = false;
 }

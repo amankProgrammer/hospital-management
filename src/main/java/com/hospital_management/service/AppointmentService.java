@@ -27,6 +27,10 @@ public class AppointmentService {
         User patient = userRepository.findById(patientId).orElseThrow(() -> new RuntimeException("Patient not found"));
         User doctor= userRepository.findById(doctorId).orElseThrow(() -> new RuntimeException("Doctor not found"));
 
+        if (!patient.isApproved()) {
+            throw new RuntimeException("Your account is pending approval. Please wait for admin approval.");
+        }
+
         LocalDateTime appointmentDate = date;
 
         // **Check if the doctor is already booked at the given time**

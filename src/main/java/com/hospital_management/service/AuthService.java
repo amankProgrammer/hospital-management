@@ -1,5 +1,6 @@
 package com.hospital_management.service;
 
+import com.hospital_management.model.Role;
 import com.hospital_management.model.User;
 import com.hospital_management.repository.UserRepository;
 import com.hospital_management.security.JwtUtil;
@@ -21,7 +22,7 @@ public class AuthService {
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public String registerUser(String username, String email, String password, String role){
+    public String registerUser(String username, String email, String password, Role role){
         if(userRepository.findByUsername(username).isPresent()){
             throw new RuntimeException("user already exists");
         }
