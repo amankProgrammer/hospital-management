@@ -21,12 +21,13 @@ public class AuthService {
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public String registerUser(String username, String password, String role){
+    public String registerUser(String username, String email, String password, String role){
         if(userRepository.findByUsername(username).isPresent()){
             throw new RuntimeException("user already exists");
         }
         User user = new User();
         user.setUsername(username);
+        user.setEmail(email);
         user.setPassword(passwordEncoder.encode(password));
         user.setRole(role);
         userRepository.save(user);

@@ -20,6 +20,9 @@ public class AppointmentService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private EmailService emailService;
+
     public Appointment bookAppointment(Long patientId, Long doctorId, LocalDateTime date){
         User patient = userRepository.findById(patientId).orElseThrow(() -> new RuntimeException("Patient not found"));
         User doctor= userRepository.findById(doctorId).orElseThrow(() -> new RuntimeException("Doctor not found"));
@@ -28,7 +31,17 @@ public class AppointmentService {
         appointment.setDoctor(doctor);
         appointment.setAppointmentDate(date);
         appointment.setStatus(AppointmentStatus.PENDING);
-        return appointmentRepository.save(appointment);
+        Appointment savedAppointment = appointmentRepository.save(appointment);
+
+        // 📧 Send Email Notification to Patient & Doctor
+        String subject = "Appointment Confirmation";
+        String message = "Dear " + patient.getUsername() + ",\n\nYour appointment with Dr. " +
+                doctor.getUsername() + " is scheduled for " + date + ".\n\nThank you!";
+
+        emailService.sendEmail(patient.getEmail(), subject, message);
+        emailService.sendEmail(doctor.getEmail(), subject, "New appointment scheduled with " + patient.getUsername());
+
+        return savedAppointment;
     }
     public List<Appointment> getAppointmentsByDoctor(Long doctorId){
         User doctor = userRepository.findById(doctorId).orElseThrow(() -> new RuntimeException("Doctor not found"));
@@ -43,7 +56,17 @@ public class AppointmentService {
         if(appointmentOpt.isPresent()){
             Appointment appointment = appointmentOpt.get();
             appointment.setStatus(status);
-            return appointmentRepository.save(appointment);
+            appointmentRepository.save(appointment);
+
+            // 📧 Notify Patient
+            String subject = "Appointment Status Update";
+            String message = "Dear " + appointment.getPatient().getUsername() + ",\n\n" +
+                    "Your appointment with Dr. " + appointment.getDoctor().getUsername() +
+                    " has been updated to: " + status + ".\n\nThank you!";
+
+            emailService.sendEmail(appointment.getPatient().getEmail(), subject, message);
+
+            return appointment;
         }
         throw new RuntimeException("Appointment not found");
     }
