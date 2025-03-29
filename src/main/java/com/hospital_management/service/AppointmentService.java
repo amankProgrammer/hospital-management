@@ -26,6 +26,18 @@ public class AppointmentService {
     public Appointment bookAppointment(Long patientId, Long doctorId, LocalDateTime date){
         User patient = userRepository.findById(patientId).orElseThrow(() -> new RuntimeException("Patient not found"));
         User doctor= userRepository.findById(doctorId).orElseThrow(() -> new RuntimeException("Doctor not found"));
+
+        LocalDateTime appointmentDate = date;
+
+        // **Check if the doctor is already booked at the given time**
+        Optional<Appointment> existingAppointment =
+                appointmentRepository.findByDoctorIdAndAppointmentDate(doctorId, appointmentDate);
+
+        if (existingAppointment.isPresent()) {
+            throw new RuntimeException("Doctor is already booked at this time. Please choose another slot.");
+        }
+
+        // **If no conflict, create the appointment**
         Appointment appointment = new Appointment();
         appointment.setPatient(patient);
         appointment.setDoctor(doctor);
